@@ -13,9 +13,9 @@ pronto e testado, o que está pronto mas ainda não foi verificado e o que falta
 | 3. Cartas em português | **Concluída no código e nos testes** | cliente/sincronização do Scryfall, cache, camadas de tradução; testes contra servidor HTTP local que imita o Scryfall. *Falta:* primeira sincronização real a partir do app |
 | 4. Tradutor de efeitos | **Concluída (v1)** | métricas fora da amostra na seção 4; 12.942 faces processadas; teste de preservação de invariantes em 100% do arquivo gerado |
 | 5. Interface mobile | **Iniciada** | botão PT/EN e selo de origem no zoom; grupo "Cartas em português" nas configurações. Restante na seção 6 |
-| 6. Biblioteca | Planejada | seção 6 |
+| 6. Biblioteca | **Iniciada** | envio de decks por "Compartilhar"/"Abrir com", seletor de arquivos e lista colada, com nomes em português ([ENVIAR_DECKS.md](ENVIAR_DECKS.md)); restante na seção 6 |
 | 7. Otimização | Parcial | carga preguiçosa do tradutor e geração no build (seção 3.4); restante na seção 6 |
-| 8. Testes | Parcial | 33 testes novos + 23 preexistentes passando (seção 5) |
+| 8. Testes | Parcial | 40 testes novos + 23 preexistentes passando (seção 5) |
 | 9. Distribuição | Planejada | workflow de CI que gera APK + `assets.zip`; passos obrigatórios na seção 6 |
 
 **Ainda não verificado aqui:** a compilação completa de `forge-gui`/`forge-gui-mobile` e o APK.
@@ -167,6 +167,7 @@ e o glossário do usuário) permite adotar termos da comunidade.
 | `forge-ptbr` `ScryfallSyncTest` (6) | paginação, impressão mais recente, faces, incremental, 404, 429 com `Retry-After`, desistência, cancelamento, cabeçalhos obrigatórios, intervalo de 500 ms |
 | `forge-ptbr` `PtBrLocalizationServiceTest` (3) | geração só onde falta oficial, reaproveitamento do cache, uso offline, falha de rede sem perder dados, correções |
 | `forge-ptbr` `TranslationFileTest` (4) | formato, escape, BOM, sobreposição |
+| `forge-core` `DeckTextImporterTest` (7) | deck `.dck` real (60/60 cartas), lista sem metadados, MTG Arena com reserva, nomes e cabeçalhos em português, texto que não é deck, nomes que nunca sobrescrevem |
 | `forge-game` (preexistentes, 23) | continuam passando |
 
 ## 6. Próximas etapas e critérios de conclusão

@@ -47,12 +47,31 @@
                     <action android:name="android.intent.action.MAIN" />
                     <category android:name="android.intent.category.LAUNCHER" />
                 </intent-filter>
+                <!-- decks enviados por outros apps: "Compartilhar" (um ou vários arquivos, ou texto) -->
                 <intent-filter>
                     <action android:name="android.intent.action.SEND" />
+                    <action android:name="android.intent.action.SEND_MULTIPLE" />
                     <category android:name="android.intent.category.DEFAULT" />
-                    <data android:mimeType="text/plain" />
+                    <data android:mimeType="text/*" />
+                    <!-- .dck/.dec chegam do WhatsApp/Telegram/Drive como tipo genérico -->
+                    <data android:mimeType="application/octet-stream" />
+                </intent-filter>
+                <!-- "Abrir com" em arquivos de deck -->
+                <intent-filter>
+                    <action android:name="android.intent.action.VIEW" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                    <data android:scheme="content" />
+                    <data android:scheme="file" />
+                    <data android:mimeType="text/*" />
+                    <data android:mimeType="application/octet-stream" />
                 </intent-filter>
         </activity>
+        <!-- seletor de arquivos de deck (modo padrão, para receber o resultado) -->
+        <activity
+            android:name=".DeckPickerActivity"
+            android:configChanges="density|fontScale|keyboard|keyboardHidden|layoutDirection|locale|mcc|mnc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|touchscreen|uiMode"
+            android:theme="@style/Theme.Transparent"
+            android:exported="false" />
         <activity
             android:name=".Main"
             android:label="@string/app_name"

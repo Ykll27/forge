@@ -26,6 +26,7 @@ import forge.card.ColorSet;
 import forge.card.MagicColor;
 import forge.item.IPaperCard;
 import forge.item.PaperCard;
+import forge.util.CardTranslation;
 import forge.util.Localizer;
 import org.apache.commons.lang3.StringUtils;
 
@@ -732,6 +733,13 @@ public class DeckRecognizer {
             if (cardName == null)
                 continue;
             cardName = cardName.trim();
+            if (!data.isMTGCard(cardName)) {
+                // translated name typed or pasted by the player (e.g. "Raio" -> "Lightning Bolt"),
+                // resolved through the card translations of the current language
+                String englishName = CardTranslation.getEnglishName(cardName);
+                if (englishName != null)
+                    cardName = englishName;
+            }
             //Avoid hit the DB - check whether cardName is contained in the DB
             if (!data.isMTGCard(cardName)){
                 // check the case for double-sided cards

@@ -543,7 +543,12 @@ public class StaticData {
         if (cardName == null || cardName.trim().length() == 0)
             return false;
         CardDb.CardRequest cr = CardDb.CardRequest.fromString(cardName);  // accounts for any foil request ending with +
-        return this.commonCards.contains(cr.cardName) || this.variantCards.contains(cr.cardName);
+        if (this.commonCards.contains(cr.cardName) || this.variantCards.contains(cr.cardName))
+            return true;
+        // lazy card database: the card may just not have been read yet (misses are cached there,
+        // and this is a no-op when cards are loaded eagerly)
+        return lazyLoadCard(cr.cardName, null)
+                && (this.commonCards.contains(cr.cardName) || this.variantCards.contains(cr.cardName));
     }
 
     /** @return {@link forge.util.storage.IStorage}<{@link forge.item.SealedTemplate}> */

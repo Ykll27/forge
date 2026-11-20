@@ -794,6 +794,24 @@ public class Main extends AndroidApplication {
         }
 
         @Override
+        public boolean canPickDeckFiles() {
+            return true;
+        }
+
+        @Override
+        public boolean pickDeckFiles() {
+            // seletor numa Activity própria: a do jogo é singleInstance (ver DeckPickerActivity)
+            runOnUiThread(() -> {
+                try {
+                    startActivity(new Intent(Main.this, DeckPickerActivity.class));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            return true;
+        }
+
+        @Override
         public boolean openFile(String filename) {
             try {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {

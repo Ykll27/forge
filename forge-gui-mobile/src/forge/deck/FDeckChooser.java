@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.Align;
 import com.google.common.collect.Lists;
 
 import forge.Forge;
+import forge.assets.FSkinImage;
 import forge.assets.ImageCache;
 import forge.deck.io.DeckPreferences;
 import forge.game.GameType;
@@ -34,6 +35,7 @@ import forge.gui.FThreads;
 import forge.gui.GuiBase;
 import forge.gui.error.BugReporter;
 import forge.gui.interfaces.IGuiGame;
+import forge.gui.ptbr.DeckInbox;
 import forge.itemmanager.DeckManager;
 import forge.itemmanager.ItemManagerConfig;
 import forge.itemmanager.filters.ItemFilter;
@@ -45,6 +47,8 @@ import forge.screens.FScreen;
 import forge.screens.LoadingOverlay;
 import forge.screens.home.NewGameMenu.NewGameScreen;
 import forge.screens.match.MatchController;
+import forge.menu.FMenuItem;
+import forge.menu.FPopupMenu;
 import forge.toolbox.FButton;
 import forge.toolbox.FComboBox;
 import forge.toolbox.FContainer;
@@ -138,7 +142,7 @@ public class FDeckChooser extends FScreen {
             }
             accept();
         });
-        btnNewDeck.setCommand(event -> createNewDeck());
+        btnNewDeck.setCommand(event -> onNewDeckButton());
         btnEditDeck.setCommand(event -> editSelectedDeck());
         btnViewDeck.setCommand(event -> {
             if (selectedDeckType != DeckType.STANDARD_COLOR_DECK && selectedDeckType != DeckType.STANDARD_CARDGEN_DECK
@@ -341,6 +345,47 @@ public class FDeckChooser extends FScreen {
                 return false;
         }
     }
+    /**
+     * "Novo deck": para decks construídos, oferece também importar um arquivo de deck ou uma
+     * lista copiada (os decks recebidos passam pela confirmação de {@link ReceivedDecks}).
+     */
+    private void onNewDeckButton() {
+        boolean importable = !isGeneratedDeck(selectedDeckType)
+                && selectedDeckType != DeckType.DRAFT_DECK && selectedDeckType != DeckType.SEALED_DECK
+                && getEditorConfig() == FDeckEditor.EditorConfigConstructed;
+        if (!importable) {
+            createNewDeck();
+            return;
+        }
+        FPopupMenu menu = new FPopupMenu() {
+            @Override
+            protected void buildMenu() {
+                addItem(new FMenuItem(Forge.getLocalizer().getMessageorUseDefault("lblNewEmptyDeck", "Empty deck"),
+                        Forge.hdbuttons ? FSkinImage.HDPLUS : FSkinImage.PLUS, e -> createNewDeck()));
+                if (Forge.getDeviceAdapter().canPickDeckFiles()) {
+                    addItem(new FMenuItem(Forge.getLocalizer().getMessageorUseDefault("lblImportDeckFile", "Import deck file..."),
+                            Forge.hdbuttons ? FSkinImage.HDIMPORT : FSkinImage.OPEN, e -> {
+                                ReceivedDecks.setOnSaved(() -> refreshDecksList(selectedDeckType, true, null));
+                                Forge.getDeviceAdapter().pickDeckFiles();
+                            }));
+                }
+                addItem(new FMenuItem(Forge.getLocalizer().getMessageorUseDefault("lblPasteDeckList", "Paste copied list"),
+                        Forge.hdbuttons ? FSkinImage.HDIMPORT : FSkinImage.OPEN, e -> {
+                            ReceivedDecks.setOnSaved(() -> refreshDecksList(selectedDeckType, true, null));
+                            Forge.readClipboard(text -> {
+                                if (text == null || text.trim().isEmpty()) {
+                                    FOptionPane.showMessageDialog(Forge.getLocalizer().getMessageorUseDefault(
+                                            "lblClipboardEmpty", "Copy a deck list first, then come back here."));
+                                    return;
+                                }
+                                DeckInbox.offer(Forge.getLocalizer().getMessageorUseDefault("lblPastedDeck", "Pasted deck"), text);
+                            });
+                        }));
+            }
+        };
+        menu.show(btnNewDeck, 0, btnNewDeck.getHeight());
+    }
+
     private void createNewDeck() {
         final FDeckEditor editor;
         final DeckProxy deck = lstDecks.getSelectedItem();

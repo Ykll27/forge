@@ -33,6 +33,19 @@ public interface IDeviceAdapter {
     boolean needFileAccess();
     void requestFileAcces();
 
+    /** True when {@link #pickDeckFiles()} can open the system file picker. */
+    default boolean canPickDeckFiles() {
+        return false;
+    }
+
+    /**
+     * Opens the system file picker to choose one or more deck files. The chosen files arrive
+     * later through {@code forge.gui.ptbr.DeckInbox}. Returns false when not supported.
+     */
+    default boolean pickDeckFiles() {
+        return false;
+    }
+
     /** Confine the mouse cursor to the window (desktop LibGDX only). Default no-op. */
     default void setMouseConfined(boolean confined) {
     }

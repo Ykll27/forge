@@ -62,6 +62,8 @@ public class CardTranslation {
     private static boolean automaticLoaded = true;
     private static volatile AutomaticTranslationProvider automaticProvider;
     private static Set <String> providerMisses = ConcurrentHashMap.newKeySet();
+    /** Translated name (normalized) -> English name; built on first use, cleared on reload. */
+    private static volatile Map <String, String> englishByTranslatedName;
 
     private static void readTranslationFile(String language, String languagesDirectory) {
         readTranslationFile(languagesDirectory + "cardnames-" + language + ".txt", Source.OFFICIAL_BUNDLED, true);
@@ -356,6 +358,38 @@ public class CardTranslation {
         return nameSources.get(translationKey);
     }
 
+    /**
+     * Reverse lookup: the English card name for a translated one, ignoring case, accents and
+     * curly quotes ("raio", "Raio" -> "Lightning Bolt"). Returns null when no translation is
+     * loaded or the name is unknown. Used by deck import so lists can be written in the
+     * player's language.
+     */
+    public static String getEnglishName(String translatedName) {
+        if (!needsTranslation() || translatedName == null || translatedName.trim().isEmpty()) {
+            return null;
+        }
+        Map<String, String> index = englishByTranslatedName;
+        if (index == null) {
+            index = new HashMap<>();
+            for (Map.Entry<String, String> e : translatednames.entrySet()) {
+                if (e.getKey().contains(" $") || e.getValue().isEmpty()) {
+                    continue; // functional variants share the base name
+                }
+                // first one wins: an ambiguous translated name keeps its first English card
+                index.putIfAbsent(normalizeName(e.getValue()), e.getKey());
+            }
+            englishByTranslatedName = index;
+        }
+        return index.get(normalizeName(translatedName));
+    }
+
+    private static String normalizeName(String name) {
+        String n = java.text.Normalizer.normalize(name.trim(), java.text.Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .replace('\u2019', '\'').replace('\u2018', '\'');
+        return n.replaceAll("\\s+", " ").toLowerCase(java.util.Locale.ROOT);
+    }
+
     /** True while a language other than English is active. */
     public static boolean isTranslationActive() {
         return needsTranslation();
@@ -474,6 +508,7 @@ public class CardTranslation {
                 throw e;
             }
             oracleMappings = new ConcurrentHashMap<>();
+            englishByTranslatedName = null;
             translatedCaches = new ConcurrentHashMap<>();
             sharedCache = new ConcurrentHashMap<>();
             providerMisses = ConcurrentHashMap.newKeySet();

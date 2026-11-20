@@ -36,6 +36,7 @@ import forge.gamemodes.limited.BoosterDraft;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
 import forge.gui.ptbr.PtBrIntegration;
+import forge.deck.ReceivedDecks;
 import forge.gui.download.CdnUuidCache;
 import forge.gui.error.BugReporter;
 import forge.gui.util.SOptionPane;
@@ -423,6 +424,8 @@ public class Forge implements ApplicationListener {
             NewGameMenu.getPreferredScreen().open();
         }
         stopContinuousRendering(); //save power consumption by disabling continuous rendering once assets loaded
+        // decks sent from other apps / the file picker are shown once the home screen is up
+        ReceivedDecks.listen();
     }
 
     public static void openAdventure() {
