@@ -19,7 +19,7 @@ final class Agreement {
         for (String[] n : NOUNS) {
             alt.append(alt.length() == 0 ? "" : "|").append(n[0]).append('|').append(n[1]);
         }
-        NUMBER_NOUN = Pattern.compile("(?<![\\w{/+\\-\u2212])(\\d+) (" + alt + ")\\b");
+        NUMBER_NOUN = Pattern.compile("(?<![\\w{/+\\-\u2212])(\\d+) (" + alt + ")\\b", SemanticCheck.WORDS);
     }
 
     private Agreement() {

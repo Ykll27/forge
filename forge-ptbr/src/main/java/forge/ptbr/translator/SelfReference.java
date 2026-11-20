@@ -47,7 +47,7 @@ public final class SelfReference {
     }
 
     private static final Pattern THIS_PATTERN = Pattern.compile(
-            "\\b([Tt]his) (" + String.join("|", THIS_FORMS.keySet()) + ")\\b");
+            "\\b([Tt]his) (" + String.join("|", THIS_FORMS.keySet()) + ")\\b", SemanticCheck.WORDS);
 
     private SelfReference() {
     }
@@ -95,7 +95,7 @@ public final class SelfReference {
             collect(hits, text, Pattern.compile(Pattern.quote(name)));
             String shortName = shortName(name);
             if (shortName != null && shortName.length() >= 3) {
-                collect(hits, text, Pattern.compile("\\b" + Pattern.quote(shortName) + "\\b(?!,)"));
+                collect(hits, text, Pattern.compile("\\b" + Pattern.quote(shortName) + "\\b(?!,)", SemanticCheck.WORDS));
             }
             // cartas divididas e de duas faces trazem às vezes só a primeira palavra
         }

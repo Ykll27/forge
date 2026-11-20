@@ -46,7 +46,7 @@ public final class Slots {
             }
             alt.append(EN_NUMBERS[i]);
         }
-        EN_NUMBER_WORD = Pattern.compile("\\b(" + alt + ")\\b");
+        EN_NUMBER_WORD = Pattern.compile("\\b(" + alt + ")\\b", SemanticCheck.WORDS);
         pt(0, "zero", "zero");
         pt(1, "um", "uma");
         pt(2, "dois", "duas");

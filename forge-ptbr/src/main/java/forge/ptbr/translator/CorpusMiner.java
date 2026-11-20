@@ -176,9 +176,9 @@ public final class CorpusMiner {
         return k.substring(0, 1).toLowerCase(Locale.ROOT) + k.substring(1);
     }
 
-    private static final java.util.regex.Pattern EN_TOKEN = java.util.regex.Pattern.compile("\\b(?:a|an|one) ([A-Z][a-z]+) token\\b");
+    private static final java.util.regex.Pattern EN_TOKEN = java.util.regex.Pattern.compile("\\b(?:a|an|one) ([A-Z][a-z]+) token\\b", SemanticCheck.WORDS);
     private static final java.util.regex.Pattern PT_TOKEN = java.util.regex.Pattern.compile("ficha de ([A-ZÀ-Ú][\\p{L}]+)");
-    private static final java.util.regex.Pattern EN_COUNTER = java.util.regex.Pattern.compile("\\b([a-z]+) counters?\\b");
+    private static final java.util.regex.Pattern EN_COUNTER = java.util.regex.Pattern.compile("\\b([a-z]+) counters?\\b", SemanticCheck.WORDS);
     private static final java.util.regex.Pattern PT_COUNTER = java.util.regex.Pattern.compile("marcador(?:es)? de ([\\p{L}]+)");
     private static final Set<String> COUNTER_STOP = new HashSet<>(Arrays.asList(
             "a", "an", "another", "that", "any", "the", "of", "those", "these", "each", "additional", "all", "more",

@@ -45,6 +45,7 @@ jobs:
           if ! git diff --quiet -- forge-gui/res/languages/cardnames-pt-BR-automatica.txt; then
             echo "::error::cardnames-pt-BR-automatica.txt desatualizado. Rode a ferramenta GenerateAutomaticTranslations e faça commit."
             git diff --stat -- forge-gui/res/languages/cardnames-pt-BR-automatica.txt
+            git diff -U0 -- forge-gui/res/languages/cardnames-pt-BR-automatica.txt | head -60
             exit 1
           fi
 

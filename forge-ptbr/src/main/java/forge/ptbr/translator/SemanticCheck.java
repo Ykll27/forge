@@ -12,6 +12,12 @@ import java.util.regex.Pattern;
 final class SemanticCheck {
     private static final Locale PT = new Locale("pt", "BR");
 
+    /**
+     * Fronteira de palavra (\\b) com letras acentuadas: sem esta opção, o Java 19+ trata "á" como
+     * não-letra e "poderá" casaria com "poder"; com ela, Java 17 e 21 dão o mesmo resultado.
+     */
+    static final int WORDS = Pattern.UNICODE_CHARACTER_CLASS;
+
     /** Pares (regex inglês, regex português). Verificados nos dois sentidos. */
     private static final Pattern[][] MARKERS = {
             pair("\\btargets?\\b", "\\balvos?\\b"),
@@ -63,22 +69,22 @@ final class SemanticCheck {
 
     private static Pattern[] pair(String en, String pt) {
         return new Pattern[]{
-                Pattern.compile(en, Pattern.CASE_INSENSITIVE),
-                Pattern.compile(pt, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)};
+                Pattern.compile(en, Pattern.CASE_INSENSITIVE | WORDS),
+                Pattern.compile(pt, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | WORDS)};
     }
 
     /** Palavras que só existem em inglês (não aparecem em texto de regras em português). */
     private static final Pattern ENGLISH_WORDS = Pattern.compile(
             "\\b(the|target|you|your|creatures?|each|with|this|of|and|draw|until|end|turn|gets|gains|has|"
             + "flying|flash|trample|haste|vigilance|reach|defender|menace|deathtouch|lifelink|ward|equip|crew|"
-            + "cycling|enchant|enchanted|destroy|create|return|choose|mill|scry|kicker|first strike)\\b");
+            + "cycling|enchant|enchanted|destroy|create|return|choose|mill|scry|kicker|first strike)\\b", WORDS);
 
     private SemanticCheck() {
     }
 
     /** Terminologia anterior a 2009 ("em jogo", "remova do jogo"). */
-    private static final Pattern OLD_ZONE_WORDING = Pattern.compile("\\b(em|do|no|ao|para o) jogo\\b", Pattern.CASE_INSENSITIVE);
-    private static final Pattern GAME = Pattern.compile("\\bgames?\\b", Pattern.CASE_INSENSITIVE);
+    private static final Pattern OLD_ZONE_WORDING = Pattern.compile("\\b(em|do|no|ao|para o) jogo\\b", Pattern.CASE_INSENSITIVE | WORDS);
+    private static final Pattern GAME = Pattern.compile("\\bgames?\\b", Pattern.CASE_INSENSITIVE | WORDS);
 
     /** O par fala dos mesmos conceitos? */
     static boolean aligned(String en, String pt) {

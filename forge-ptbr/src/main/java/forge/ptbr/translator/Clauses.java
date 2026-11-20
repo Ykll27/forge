@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  */
 final class Clauses {
     private static final Pattern HEAD_WORDS = Pattern.compile(
-            "^(When|Whenever|At|If|As|During|Until|For as long as|Each time|Otherwise|Then|Once|Unless|Except|For each|Starting|Instead)\\b.*");
+            "^(When|Whenever|At|If|As|During|Until|For as long as|Each time|Otherwise|Then|Once|Unless|Except|For each|Starting|Instead)\\b.*", SemanticCheck.WORDS);
 
     private Clauses() {
     }

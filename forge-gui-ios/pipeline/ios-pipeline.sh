@@ -2,7 +2,7 @@
 # ios-pipeline.sh — build unmodified upstream Forge for iOS (MobiVM).
 #
 # Typical merge workflow:
-#   git pull && mvn clean install -pl forge-core,forge-game,forge-gui,forge-gui-mobile,forge-ai -DskipTests
+#   git pull && mvn clean install -pl forge-core,forge-game,forge-ai,forge-ptbr,forge-gui,forge-gui-mobile -DskipTests
 #   pipeline/ios-pipeline.sh classpath   # check the audit report it prints
 #   pipeline/ios-pipeline.sh sim         # or: device
 #
@@ -542,7 +542,7 @@ audit() {
     # '.' installs the parent POM too — required on a fresh clone, else the
     # iOS classpath resolution fails on the forge:forge:pom \${revision} parent
     (cd "$ROOT" && mvn -B -ntp -q install \
-        -pl .,forge-core,forge-game,forge-gui,forge-gui-mobile,forge-ai -DskipTests)
+        -pl .,forge-core,forge-game,forge-ai,forge-ptbr,forge-gui,forge-gui-mobile -DskipTests)
     classpath
     build_module
     echo "iOS COMPATIBILITY GATE PASSED"
@@ -555,7 +555,7 @@ ipa() {
     # '.' installs the parent POM too — required on a fresh clone, else the
     # iOS classpath resolution fails on the forge:forge:pom \${revision} parent
     (cd "$ROOT" && mvn -B -ntp -q install \
-        -pl .,forge-core,forge-game,forge-gui,forge-gui-mobile,forge-ai -DskipTests)
+        -pl .,forge-core,forge-game,forge-ai,forge-ptbr,forge-gui,forge-gui-mobile -DskipTests)
     classpath
     prep_build
     echo "=== robovm:create-ipa (unsigned) ==="
