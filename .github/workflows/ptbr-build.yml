@@ -52,6 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: testes
     name: APK de teste
+    permissions:
+      contents: write   # publicar a release "daily-snapshots" do fork
     steps:
       - uses: actions/checkout@v4
 
@@ -90,3 +92,24 @@ jobs:
             forge-gui-android/target/*.apk
             forge-gui-android/target/assets.zip
           if-no-files-found: error
+
+      # O app (versão SNAPSHOT) busca version.txt e assets.zip em
+      # GITHUB_FORGE_URL/releases/download/daily-snapshots/ (ForgeConstants). Com GITHUB_FORGE_URL
+      # apontando para este fork, esta release é o que o celular baixa na primeira abertura.
+      - name: Publicar release daily-snapshots
+        if: github.event_name == 'workflow_dispatch' || github.ref_name == 'ptbr-mobile'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release
+          cp forge-gui-android/target/*.apk release/
+          cp forge-gui-android/target/assets.zip release/
+          for f in version.txt build.txt; do
+            p=$(find forge-gui-android/target -name "$f" | head -1)
+            if [ -n "$p" ]; then cp "$p" release/; fi
+          done
+          ls -la release
+          gh release delete daily-snapshots --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
+          gh release create daily-snapshots release/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --prerelease --title "Forge PT-BR (teste)" \
+            --notes "APK de teste (assinado com chave de depuração) e recursos. Instale o APK; na primeira abertura o app baixa o assets.zip desta release."
