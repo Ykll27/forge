@@ -28,9 +28,10 @@ import java.util.Map;
 public final class ForgeConstants {
 
     private static final Localizer localizer = Localizer.getInstance();
-    public static final String GITHUB_FORGE_URL                 = "https://github.com/Card-Forge/forge/";
+    // Forge PT-BR: assets.zip, version.txt e atualizações vêm da release "daily-snapshots" deste fork
+    public static final String GITHUB_FORGE_URL                 = "https://github.com/Ykll27/forge/";
     public static final String GITHUB_RELEASES_ATOM             = GITHUB_FORGE_URL + "releases.atom";
-    public static final String GITHUB_COMMITS_ATOM              = GITHUB_FORGE_URL + "commits/master.atom";
+    public static final String GITHUB_COMMITS_ATOM              = GITHUB_FORGE_URL + "commits/ptbr-mobile.atom";
     public static final String GITHUB_SNAPSHOT_URL              = GITHUB_FORGE_URL + "releases/download/daily-snapshots/";
     public static final String NETWORK_PLAY_WIKI_URL            = GITHUB_FORGE_URL + "wiki/network-play";
     public static final String RELEASE_URL                      = "https://releases.cardforge.org/";
