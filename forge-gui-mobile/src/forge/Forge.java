@@ -35,6 +35,7 @@ import forge.error.ExceptionHandler;
 import forge.gamemodes.limited.BoosterDraft;
 import forge.gui.FThreads;
 import forge.gui.GuiBase;
+import forge.gui.ptbr.PtBrIntegration;
 import forge.gui.download.CdnUuidCache;
 import forge.gui.error.BugReporter;
 import forge.gui.util.SOptionPane;
@@ -274,7 +275,9 @@ public class Forge implements ApplicationListener {
                 FSkinFont.preloadAll(locale);
 
                 splashStep(getLocalizer().getMessage("lblLoadingCardTranslations"), 900);
-                CardTranslation.preloadTranslation(locale, ForgeConstants.LANG_DIR);
+                // pt-BR: also the downloaded official texts, automatic translations and the player's corrections
+                PtBrIntegration.preloadTranslation(locale);
+                PtBrIntegration.onCardDatabaseReady(locale);
 
                 splashStep(getLocalizer().getMessage("lblPrepareDatabase"), 940);
                 Gdx.app.postRunnable(this::afterDbLoaded);

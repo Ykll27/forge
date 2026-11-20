@@ -35,6 +35,7 @@ import forge.game.GameType;
 import forge.game.card.CardUtil;
 import forge.game.spellability.Spell;
 import forge.gamemodes.gauntlet.GauntletData;
+import forge.gui.ptbr.PtBrIntegration;
 import forge.gui.GuiBase;
 import forge.gui.download.CdnUuidCache;
 import forge.gamemodes.limited.LimitedMatch;
@@ -252,7 +253,8 @@ public final class FModel {
         }
 
         // Do this first so PaperCards see the real preference
-        CardTranslation.preloadTranslation(getPreferences().getPref(FPref.UI_LANGUAGE), ForgeConstants.LANG_DIR);
+        // (pt-BR also reads the downloaded/automatic/corrected layers from the user directory)
+        PtBrIntegration.preloadTranslation(getPreferences().getPref(FPref.UI_LANGUAGE));
 
         // Create profile dirs if they don't already exist
         for (final String dname : ForgeConstants.PROFILE_DIRS) {
@@ -306,6 +308,9 @@ public final class FModel {
         forge.card.CardAiHints.setKeptForFlatMc(name -> getPreferences().getPrefBoolean(FPref.MATCH_AI_FLAT_MONTE_CARLO)
                 && AiCardLists.isFlatMcPlayable(name));
         AiProfileUtil.setAiSideboardingMode(AiProfileUtil.AISideboardingMode.normalizedValueOf(getPreferences().getPref(FPref.MATCH_AI_SIDEBOARDING_MODE)));
+
+        // pt-BR: translator on demand for cards without a translation on file (display only)
+        PtBrIntegration.onCardDatabaseReady(getPreferences().getPref(FPref.UI_LANGUAGE));
 
         // Generate Deck Gen matrix
         if(getPreferences().getPrefBoolean(FPref.DECKGEN_CARDBASED) && !loadCardsLazily) {

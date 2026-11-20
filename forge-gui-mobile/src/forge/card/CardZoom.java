@@ -101,6 +101,8 @@ public class CardZoom extends FOverlay {
     private static final float OFFSCREEN = -100000f;
     private static final int BTN_MUTATE = 0, BTN_SPECIALIZE = 1, BTN_ROTATE = 2, BTN_FLIP = 3; // left-to-right order
     private static final int BTN_COUNT = 4;
+    /** Área tocável do selo de idioma (PT-BR): alterna texto traduzido/original. */
+    private static final Rectangle languagePill = new Rectangle();
     private static final boolean[] btnOn = new boolean[BTN_COUNT];
     private static final float[] btnAlpha = new float[BTN_COUNT];
     private static final float[] btnSlot = new float[BTN_COUNT];
@@ -805,6 +807,10 @@ public class CardZoom extends FOverlay {
     @Override
     public boolean tap(float x, float y, int count) {
         if (closing) return true;
+        if (languagePill.width > 0 && languagePill.contains(x, y)) {
+            CardTextLanguage.toggle(); // só muda o texto exibido; as regras não usam tradução
+            return true;
+        }
         if (btnHit[BTN_ROTATE].contains(x, y)) {
             toggleRotate();
             return true;
@@ -1039,9 +1045,36 @@ public class CardZoom extends FOverlay {
         g.fillRect(FDialog.getMsgBackColor(), 0, h - messageHeight, w, messageHeight);
         g.drawText(zoomMode ? Forge.getLocalizer().getMessage("lblSwipeDownDetailView") : Forge.getLocalizer().getMessage("lblSwipeDownPictureView"), FDialog.MSG_FONT, FDialog.getMsgForeColor(), 0, h - messageHeight, w, messageHeight, false, Align.center, true);
 
+        drawLanguagePill(g, w, messageHeight);
         drawActionRow(g, w / 2, rowCy, btnD); // buttons last so nothing draws over them
         g.setAlphaComposite(baseAlpha);
         interrupt(false);
+    }
+
+    /**
+     * Selo no topo da visão de detalhes (quando há tradução ativa): de onde vem o texto exibido
+     * (oficial, automático, corrigido) e um toque para alternar com o original em inglês. Só na
+     * visão de detalhes, onde o texto é desenhado; na visão de imagem a foto da carta não muda.
+     * Fica na barra de mensagens superior, que só é usada por avisos de ativação e de aventura.
+     */
+    private void drawLanguagePill(Graphics g, float w, float messageHeight) {
+        if (zoomMode || !CardTextLanguage.isAvailable() || isAdvBack || currentActivateAction != null || currentCard == null) {
+            languagePill.set(0, 0, 0, 0);
+            return;
+        }
+        CardView.CardStateView state = currentCard.getState(showAltState);
+        String label = CardTextLanguage.showSourceBadge() ? CardTextLanguage.sourceLabel(state) + " \u2014 " : "";
+        String text = label + CardTextLanguage.toggleHint();
+        float pad = Utils.scale(8);
+        float pillW = Math.min(w - 2 * pad, FDialog.MSG_FONT.getBounds(text).width + 3 * pad);
+        float pillH = messageHeight * 0.8f;
+        float px = (w - pillW) / 2;
+        float py = (messageHeight - pillH) / 2;
+        g.fillRoundRect(FDialog.getMsgBackColor(), px, py, pillW, pillH, pillH / 2);
+        g.drawText(text, FDialog.MSG_FONT, FDialog.getMsgForeColor(), px, py, pillW, pillH, false, Align.center, true);
+        // área de toque generosa (pelo menos a largura média de um dedo na altura)
+        float hitH = Math.max(pillH, Utils.AVG_FINGER_HEIGHT);
+        languagePill.set(px, py + pillH / 2 - hitH / 2, pillW, hitH);
     }
 
     private void drawIconBounds(Graphics g, Rectangle iconBounds, FSkinImage skinImage, float x, float y, float cardWidth, float cardHeight) {

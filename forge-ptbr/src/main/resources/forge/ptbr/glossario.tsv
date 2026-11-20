@@ -1,0 +1,8 @@
+# Glossário curado do tradutor PT-BR (complementa a terminologia minerada das cartas oficiais).
+# Formato TSV: TIPO<TAB>inglês<TAB>português<TAB>status[<TAB>nota]
+#   TIPO: KEYWORD, ABILITY_WORD, SUBTYPE, TYPE, TOKEN, COUNTER
+#   status: oficial (conferido em material impresso/Arena) ou comunidade (sem termo oficial)
+#   Palavras-chave em minúsculas; lacunas como no tradutor: {M0} custo, {N0} número.
+# Termos minerados de cartas oficiais sempre vencem as entradas daqui.
+# Mecânicas posteriores ao fim da impressão em português (2024) ficam em inglês até
+# alguém registrar aqui o termo adotado, com status e fonte na nota.

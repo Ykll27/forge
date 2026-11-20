@@ -19,6 +19,8 @@ import forge.localinstance.properties.ForgePreferences;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.localinstance.properties.IPreferences;
 import forge.model.FModel;
+import forge.gui.ptbr.PtBrIntegration;
+import forge.screens.LoadingOverlay;
 import forge.screens.FScreen;
 import forge.screens.TabPageScreen;
 import forge.screens.TabPageScreen.TabPage;
@@ -65,6 +67,11 @@ public class SettingsPage extends TabPage<SettingsScreen> {
         lstSettings.addGroup(Forge.getLocalizer().getMessage("lblVibrationOptions"));
         lstSettings.addGroup(Forge.getLocalizer().getMessage("SoundOptions"));
         lstSettings.addGroup(Forge.getLocalizer().getMessage("ServerPreferences"));
+
+        // CARTAS EM PORTUGUÊS (só com o idioma pt-BR): textos oficiais, tradução automática e origem do texto
+        if (PtBrIntegration.isPortuguese(FModel.getPreferences().getPref(FPref.UI_LANGUAGE))) {
+            addPortugueseCardSettings(9);
+        }
 
         // GENERAL SETTINGS TAB
         lstSettings.addItem(new CustomSelectSetting(FPref.UI_LANGUAGE, Forge.getLocalizer().getMessage("cbpSelectLanguage"),
@@ -919,6 +926,84 @@ public class SettingsPage extends TabPage<SettingsScreen> {
         float searchHeight = FTextField.getDefaultHeight(txtSearch.getFont());
         txtSearch.setBounds(0, 0, width, searchHeight);
         lstSettings.setBounds(0, searchHeight, width, height - searchHeight);
+    }
+
+    /** Grupo "Cartas em português": baixar textos oficiais, tradução automática, selo de origem. */
+    private void addPortugueseCardSettings(int group) {
+        lstSettings.addGroup(Forge.getLocalizer().getMessageorUseDefault("lblPtBrCards", "Cards in Portuguese"));
+        lstSettings.addItem(new BooleanSetting(FPref.UI_PTBR_AUTOMATIC_TRANSLATION,
+                Forge.getLocalizer().getMessageorUseDefault("cbPtBrAutomaticTranslation", "Automatic translation"),
+                Forge.getLocalizer().getMessageorUseDefault("nlPtBrAutomaticTranslation",
+                        "Translates cards without an official Portuguese text. Display only: rules never change.")) {
+            @Override
+            public void select() {
+                super.select();
+                String language = FModel.getPreferences().getPref(FPref.UI_LANGUAGE);
+                PtBrIntegration.preloadTranslation(language);
+                PtBrIntegration.onCardDatabaseReady(language);
+            }
+        }, group);
+        lstSettings.addItem(new BooleanSetting(FPref.UI_PTBR_SHOW_TEXT_SOURCE,
+                Forge.getLocalizer().getMessageorUseDefault("cbPtBrShowTextSource", "Show text source"),
+                Forge.getLocalizer().getMessageorUseDefault("nlPtBrShowTextSource",
+                        "In the card zoom, shows whether the text is official, automatic or your correction.")), group);
+        lstSettings.addItem(new Setting(FPref.UI_LANGUAGE,
+                Forge.getLocalizer().getMessageorUseDefault("lblPtBrUpdateOfficial", "Download/update official texts"),
+                PtBrIntegration.statusSummary()) {
+            @Override
+            public void select() {
+                FOptionPane.showConfirmDialog(
+                        Forge.getLocalizer().getMessageorUseDefault("lblPtBrUpdateOfficialConfirm",
+                                "Downloads the Portuguese printed texts from Scryfall (a few MB, a few minutes the first time). Continue?"),
+                        Forge.getLocalizer().getMessageorUseDefault("lblPtBrUpdateOfficial", "Download/update official texts"),
+                        Forge.getLocalizer().getMessage("lblYes"), Forge.getLocalizer().getMessage("lblNo"), result -> {
+                            if (result) {
+                                runPortugueseTask(true);
+                            }
+                        });
+            }
+
+            @Override
+            public void drawPrefValue(Graphics g, FSkinFont font, FSkinColor color, float x, float y, float w, float h) {
+            }
+        }, group);
+        lstSettings.addItem(new Setting(FPref.UI_LANGUAGE,
+                Forge.getLocalizer().getMessageorUseDefault("lblPtBrRegenerate", "Regenerate automatic translations"),
+                Forge.getLocalizer().getMessageorUseDefault("nlPtBrRegenerate",
+                        "Redoes only what changed (new cards, new official texts). Works offline.")) {
+            @Override
+            public void select() {
+                runPortugueseTask(false);
+            }
+
+            @Override
+            public void drawPrefValue(Graphics g, FSkinFont font, FSkinColor color, float x, float y, float w, float h) {
+            }
+        }, group);
+    }
+
+    /** Executa sincronização ou regeneração em segundo plano, com o progresso na legenda. */
+    private void runPortugueseTask(boolean download) {
+        String caption = Forge.getLocalizer().getMessageorUseDefault("lblPtBrWorking", "Updating card texts...");
+        LoadingOverlay.runBackgroundTask(caption, false, loader -> {
+            String message;
+            try {
+                if (download) {
+                    message = PtBrIntegration.syncOfficialTexts(false,
+                            (done, total, seen) -> loader.setCaption(caption + " " + done + "/" + total), () -> false);
+                } else {
+                    forge.ptbr.service.AutomaticGenerator.Output out = PtBrIntegration.regenerate(
+                            (done, total) -> loader.setCaption(caption + " " + (100 * done / Math.max(1, total)) + "%"), () -> false);
+                    message = Forge.getLocalizer().getMessageorUseDefault("lblPtBrRegenerated", "Automatic translations: %s cards.")
+                            .replace("%s", Integer.toString(out.translated + out.reused));
+                }
+            } catch (java.io.IOException | RuntimeException e) {
+                message = Forge.getLocalizer().getMessageorUseDefault("lblPtBrFailed",
+                        "Could not finish (your current texts were kept): ") + e.getMessage();
+            }
+            final String result = message;
+            forge.gui.FThreads.invokeInEdtLater(() -> FOptionPane.showMessageDialog(result));
+        });
     }
 
     private abstract class Setting {

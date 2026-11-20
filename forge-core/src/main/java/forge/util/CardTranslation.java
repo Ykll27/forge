@@ -26,10 +26,57 @@ public class CardTranslation {
     private static final Pattern TRANSLATION_INVARIANT = Pattern.compile("\\{[^}]{1,6}\\}|[+-]\\d+/[+-]\\d+");
     private static String languageSelected = "en-US";
 
-    private static void readTranslationFile(String language, String languagesDirectory) {
-        String filename = "cardnames-" + language + ".txt";
+    /**
+     * Where a displayed translation came from. Later constants take priority over earlier ones,
+     * field by field: an automatic translation only shows where no official text exists, and a
+     * player's own correction wins over everything.
+     */
+    public enum Source {
+        /** Machine translation (display only, never used by the rules engine). */
+        AUTOMATIC,
+        /** Official printed text shipped with Forge (res/languages/cardnames-*.txt). */
+        OFFICIAL_BUNDLED,
+        /** Official printed text downloaded later (e.g. from Scryfall) into the user directory. */
+        OFFICIAL_DOWNLOADED,
+        /** Correction made by the player. */
+        USER
+    }
 
-        try (LineReader translationFile = new LineReader(Files.newInputStream(Paths.get(languagesDirectory + filename)), StandardCharsets.UTF_8)) {
+    /**
+     * Supplies a translation on demand for a card that has none on file (a custom card, or a card
+     * added after the translation files were generated). Called at most once per card while ready.
+     */
+    public interface AutomaticTranslationProvider {
+        /** False while the provider is still loading; misses are not remembered meanwhile. */
+        boolean isReady();
+
+        /** @return {translated type, translated text with literal "\\n" between lines}, either may be empty; or null */
+        String[] translate(String translationKey);
+    }
+
+    private static Map <String, Source> nameSources;
+    private static Map <String, Source> typeSources;
+    private static Map <String, Source> textSources;
+    private static String languagesDirectoryLoaded;
+    private static String userDirectoryLoaded;
+    private static boolean automaticLoaded = true;
+    private static volatile AutomaticTranslationProvider automaticProvider;
+    private static Set <String> providerMisses = ConcurrentHashMap.newKeySet();
+
+    private static void readTranslationFile(String language, String languagesDirectory) {
+        readTranslationFile(languagesDirectory + "cardnames-" + language + ".txt", Source.OFFICIAL_BUNDLED, true);
+    }
+
+    /**
+     * Reads one translation file into the current maps. Only non-empty fields are taken, so a
+     * file with a higher priority source can fill in or replace single fields of a card without
+     * blanking the others.
+     */
+    private static void readTranslationFile(String path, Source source, boolean required) {
+        if (!required && !Files.isRegularFile(Paths.get(path))) {
+            return; // optional overlay that has not been created yet
+        }
+        try (LineReader translationFile = new LineReader(Files.newInputStream(Paths.get(path)), StandardCharsets.UTF_8)) {
             for (String line : translationFile.readLines()) {
                 String[] matches = line.split("\\|");
                 if (matches.length >= 2) {
@@ -38,27 +85,62 @@ public class CardTranslation {
                         String[] variantSplit = matches[0].split("\\s*\\$", 2);
                         if(variantSplit.length > 1) {
                             //Add the base name to the translated names.
-                            translatednames.put(variantSplit[0], matches[1]);
+                            if (!matches[1].isEmpty()) {
+                                translatednames.put(variantSplit[0], matches[1]);
+                            }
                             matches[0] = variantSplit[0] + " $" + variantSplit[1]; //Standardize storage.
                         }
                     }
-                    translatednames.put(matches[0], matches[1]);
+                    if (!matches[1].isEmpty()) {
+                        translatednames.put(matches[0], matches[1]);
+                        nameSources.put(matches[0], source);
+                    }
                 }
-                if (matches.length >= 3) {
+                if (matches.length >= 3 && !matches[2].isEmpty()) {
                     translatedtypes.put(matches[0], matches[2]);
+                    typeSources.put(matches[0], source);
                 }
-                if (matches.length >= 4) {
-                    String toracle = matches[3];
-                    // Workaround to remove additional //Level_2// and //Level_3// lines from non-English Class cards
-                    toracle = toracle.replace("//Level_2//\\n", "").replace("//Level_3//\\n", "");
-                    // Workaround for roll dice cards
-                    toracle = toracle.replace("\\n", "\r\n\r\n").replace("VERT", "|");
-                    translatedoracles.put(matches[0], toracle);
+                if (matches.length >= 4 && !matches[3].isEmpty()) {
+                    translatedoracles.put(matches[0], normalizeOracle(matches[3]));
+                    textSources.put(matches[0], source);
                 }
             }
         } catch (IOException e) {
-            if (!"en-US".equalsIgnoreCase(language))
-                System.err.println("Error reading translation file: cardnames-" + language + ".txt");
+            if (required && !"en-US".equalsIgnoreCase(languageSelected))
+                System.err.println("Error reading translation file: " + path);
+        }
+    }
+
+    private static String normalizeOracle(String toracle) {
+        // Workaround to remove additional //Level_2// and //Level_3// lines from non-English Class cards
+        toracle = toracle.replace("//Level_2//\\n", "").replace("//Level_3//\\n", "");
+        // Workaround for roll dice cards
+        return toracle.replace("\\n", "\r\n\r\n").replace("VERT", "|");
+    }
+
+    /** Asks the automatic provider, once, for a card that has no translated type or text on file. */
+    private static void consultProvider(String key) {
+        AutomaticTranslationProvider provider = automaticProvider;
+        if (provider == null || key == null || providerMisses.contains(key) || !provider.isReady()) {
+            return;
+        }
+        String[] result;
+        try {
+            result = provider.translate(key);
+        } catch (RuntimeException e) {
+            result = null; // a display helper must never break the game
+        }
+        providerMisses.add(key);
+        if (result == null) {
+            return;
+        }
+        if (result.length > 0 && result[0] != null && !result[0].isEmpty() && !translatedtypes.containsKey(key)) {
+            translatedtypes.put(key, result[0]);
+            typeSources.put(key, Source.AUTOMATIC);
+        }
+        if (result.length > 1 && result[1] != null && !result[1].isEmpty() && !translatedoracles.containsKey(key)) {
+            translatedoracles.put(key, normalizeOracle(result[1]));
+            textSources.put(key, Source.AUTOMATIC);
         }
     }
 
@@ -215,6 +297,10 @@ public class CardTranslation {
     public static String getTranslatedType(String name, String originaltype) {
         if (needsTranslation()) {
             String ttype = translatedtypes.get(name);
+            if (ttype == null) {
+                consultProvider(name);
+                ttype = translatedtypes.get(name);
+            }
             return ttype == null ? originaltype : ttype;
         }
 
@@ -224,12 +310,20 @@ public class CardTranslation {
     public static String getTranslatedType(ITranslatable item) {
         if (!needsTranslation())
             return item.getUntranslatedType();
-        return translatedtypes.getOrDefault(item.getTranslationKey(), item.getUntranslatedType());
+        String key = item.getTranslationKey();
+        if (!translatedtypes.containsKey(key)) {
+            consultProvider(key);
+        }
+        return translatedtypes.getOrDefault(key, item.getUntranslatedType());
     }
 
     public static String getTranslatedOracle(String name) {
         if (needsTranslation()) {
             String toracle = translatedoracles.get(name);
+            if (toracle == null) {
+                consultProvider(name);
+                toracle = translatedoracles.get(name);
+            }
             return toracle == null ? "" : toracle;
         }
 
@@ -240,7 +334,40 @@ public class CardTranslation {
         if(!needsTranslation())
             return ""; //card.getUntranslatedOracle();
         //Fallbacks and english versions of oracle texts are handled elsewhere.
-        return translatedoracles.getOrDefault(card.getTranslationKey(), "");
+        return getTranslatedOracle(card.getTranslationKey());
+    }
+
+    /** Where the displayed rules text of a card comes from, or null when it is shown in English. */
+    public static Source getTextSource(String translationKey) {
+        if (!needsTranslation() || translationKey == null) {
+            return null;
+        }
+        if (!translatedoracles.containsKey(translationKey)) {
+            consultProvider(translationKey);
+        }
+        return textSources.get(translationKey);
+    }
+
+    /** Where the displayed name of a card comes from, or null when it is shown in English. */
+    public static Source getNameSource(String translationKey) {
+        if (!needsTranslation() || translationKey == null) {
+            return null;
+        }
+        return nameSources.get(translationKey);
+    }
+
+    /** True while a language other than English is active. */
+    public static boolean isTranslationActive() {
+        return needsTranslation();
+    }
+
+    /**
+     * Registers the provider asked for cards without a translation on file. Passing null removes it.
+     * Clears the remembered misses so cards skipped before get another chance.
+     */
+    public static void setAutomaticTranslationProvider(AutomaticTranslationProvider provider) {
+        automaticProvider = provider;
+        providerMisses = ConcurrentHashMap.newKeySet();
     }
 
     public static HashMap<String, String> getTranslationTexts(ITranslatable card) {
@@ -272,18 +399,93 @@ public class CardTranslation {
     }
 
     public static void preloadTranslation(String language, String languagesDirectory) {
-        languageSelected = language;
+        preloadTranslation(language, languagesDirectory, null);
+    }
 
-        if (needsTranslation()) {
-            translatednames = new HashMap<>();
-            translatedtypes = new HashMap<>();
-            translatedoracles = new HashMap<>();
-            oracleMappings = new HashMap<>();
-            // read from the game thread and the EDT both, and computeIfAbsent on a plain
-            // HashMap is not safe under that
+    /**
+     * Loads translations for a language. Besides the bundled {@code cardnames-<lang>.txt}, reads,
+     * when present and in increasing priority:
+     * <ol>
+     *   <li>{@code cardnames-<lang>-automatica.txt} in the languages directory (shipped machine translations);</li>
+     *   <li>{@code cardnames-<lang>-automatica.txt} in the user directory (regenerated on the device);</li>
+     *   <li>the bundled official file;</li>
+     *   <li>{@code cardnames-<lang>-oficial.txt} in the user directory (official text downloaded later);</li>
+     *   <li>{@code cardnames-<lang>-usuario.txt} in the user directory (the player's corrections).</li>
+     * </ol>
+     * These are display strings only; card scripts and the rules engine are untouched.
+     *
+     * @param userDirectory writable directory with the downloaded/generated files, or null
+     */
+    public static void preloadTranslation(String language, String languagesDirectory, String userDirectory) {
+        preloadTranslation(language, languagesDirectory, userDirectory, true);
+    }
+
+    /** As above; {@code includeAutomatic=false} skips the machine translation layers entirely. */
+    public static void preloadTranslation(String language, String languagesDirectory, String userDirectory,
+                                          boolean includeAutomatic) {
+        languagesDirectoryLoaded = languagesDirectory;
+        userDirectoryLoaded = userDirectory;
+        automaticLoaded = includeAutomatic;
+
+        if (!"en-US".equals(language)) {
+            // read from the game thread and the EDT both: concurrent maps throughout. They are
+            // filled here and only then published, so a reload never shows a half-read state.
+            Map<String, String> names = new ConcurrentHashMap<>();
+            Map<String, String> types = new ConcurrentHashMap<>();
+            Map<String, String> oracles = new ConcurrentHashMap<>();
+            Map<String, Source> nameSrc = new ConcurrentHashMap<>();
+            Map<String, Source> typeSrc = new ConcurrentHashMap<>();
+            Map<String, Source> textSrc = new ConcurrentHashMap<>();
+            Map<String, String> prevNames = translatednames;
+            Map<String, String> prevTypes = translatedtypes;
+            Map<String, String> prevOracles = translatedoracles;
+            Map<String, Source> prevNameSrc = nameSources;
+            Map<String, Source> prevTypeSrc = typeSources;
+            Map<String, Source> prevTextSrc = textSources;
+            translatednames = names;
+            translatedtypes = types;
+            translatedoracles = oracles;
+            nameSources = nameSrc;
+            typeSources = typeSrc;
+            textSources = textSrc;
+            String languageBefore = languageSelected;
+            languageSelected = language;
+            try {
+                if (includeAutomatic) {
+                    readTranslationFile(languagesDirectory + "cardnames-" + language + "-automatica.txt", Source.AUTOMATIC, false);
+                    if (userDirectory != null) {
+                        readTranslationFile(userDirectory + "cardnames-" + language + "-automatica.txt", Source.AUTOMATIC, false);
+                    }
+                }
+                readTranslationFile(languagesDirectory + "cardnames-" + language + ".txt", Source.OFFICIAL_BUNDLED, true);
+                if (userDirectory != null) {
+                    readTranslationFile(userDirectory + "cardnames-" + language + "-oficial.txt", Source.OFFICIAL_DOWNLOADED, false);
+                    readTranslationFile(userDirectory + "cardnames-" + language + "-usuario.txt", Source.USER, false);
+                }
+            } catch (RuntimeException e) {
+                // keep whatever was loaded before rather than leave the game without names
+                translatednames = prevNames;
+                translatedtypes = prevTypes;
+                translatedoracles = prevOracles;
+                nameSources = prevNameSrc;
+                typeSources = prevTypeSrc;
+                textSources = prevTextSrc;
+                languageSelected = languageBefore;
+                throw e;
+            }
+            oracleMappings = new ConcurrentHashMap<>();
             translatedCaches = new ConcurrentHashMap<>();
             sharedCache = new ConcurrentHashMap<>();
-            readTranslationFile(languageSelected, languagesDirectory);
+            providerMisses = ConcurrentHashMap.newKeySet();
+        } else {
+            languageSelected = language;
+        }
+    }
+
+    /** Reloads the files of the current language, e.g. after a download or a correction. */
+    public static void reload() {
+        if (languagesDirectoryLoaded != null) {
+            preloadTranslation(languageSelected, languagesDirectoryLoaded, userDirectoryLoaded, automaticLoaded);
         }
     }
 

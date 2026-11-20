@@ -271,6 +271,15 @@ public class CardDetailUtil {
     }
 
     public static String composeCardText(final CardStateView state, final GameView gameView, final boolean canShow) {
+        return composeCardText(state, gameView, canShow, false);
+    }
+
+    /**
+     * @param original true to show the English Oracle text even when a translation is active
+     *                 (the "ver original" toggle of the PT-BR build); rules are never affected
+     */
+    public static String composeCardText(final CardStateView state, final GameView gameView, final boolean canShow,
+                                         final boolean original) {
         if (!canShow || state == null) {
             return "";
         }
@@ -298,7 +307,7 @@ public class CardDetailUtil {
         // card text
         area.append("\n");
 
-        boolean needTranslation = true;
+        boolean needTranslation = !original;
         if (card.isToken() && card.getCloneOrigin() == null) {
             needTranslation = false;
         }

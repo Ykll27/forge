@@ -373,7 +373,7 @@ public class CardImageRenderer {
         x += padding;
         w -= 2 * padding;
         if (!noText && state != null)
-            g.drawText(CardTranslation.getTranslatedName(state.getName()), NAME_FONT, Color.BLACK, x, y, w - manaCostWidth - padding, h, false, Align.left, true);
+            g.drawText(CardTextLanguage.isShowingOriginal() ? state.getName() : CardTranslation.getTranslatedName(state.getName()), NAME_FONT, Color.BLACK, x, y, w - manaCostWidth - padding, h, false, Align.left, true);
     }
 
     public static final FBufferedImage forgeArt;
@@ -592,7 +592,7 @@ public class CardImageRenderer {
             return;
         x += padding;
         if (state != null)
-            g.drawText(CardDetailUtil.formatCardType(state, canShow), TYPE_FONT, Color.BLACK, x, y, w, h, false, Align.left, true);
+            g.drawText(CardTextLanguage.type(state, canShow), TYPE_FONT, Color.BLACK, x, y, w, h, false, Align.left, true);
     }
 
     //use text renderer to handle mana symbols and reminder text
@@ -727,7 +727,7 @@ public class CardImageRenderer {
                 g.drawImage(FSkin.getImages().get(imageProp), x + (w - iconSize) / 2, y + (h - iconSize) / 2, iconSize, iconSize);
             }
         } else {
-            boolean needTranslation = true;
+            boolean needTranslation = !CardTextLanguage.isShowingOriginal();
             String text = "";
             if (card.isToken()) {
                 if (card.getCloneOrigin() == null)
@@ -1239,7 +1239,7 @@ public class CardImageRenderer {
         //draw name for card
         x += padding;
         w -= 2 * padding;
-        g.drawText(CardDetailUtil.formatCardName(card, canShow, state == card.getAlternateState()), NAME_FONT, Color.BLACK, x, y, w - manaCostWidth - padding, h, false, Align.left, true);
+        g.drawText(CardTextLanguage.name(card, canShow, state == card.getAlternateState()), NAME_FONT, Color.BLACK, x, y, w - manaCostWidth - padding, h, false, Align.left, true);
 
         //draw type and set label for card
         y += h;
@@ -1270,7 +1270,7 @@ public class CardImageRenderer {
         y += padY;
         w -= 2 * padX;
         h -= 2 * padY;
-        cardTextRenderer.drawText(g, CardDetailUtil.composeCardText(state, gameView, canShow), TEXT_FONT, Color.BLACK, x, y, w, h, y, h, true, Align.left, false);
+        cardTextRenderer.drawText(g, CardDetailUtil.composeCardText(state, gameView, canShow, CardTextLanguage.isShowingOriginal()), TEXT_FONT, Color.BLACK, x, y, w, h, y, h, true, Align.left, false);
     }
 
     private static void drawDetailsIdAndPtBox(Graphics g, CardStateView state, boolean canShow, Color idForeColor, Color[] colors, float x, float y, float w, float h) {
