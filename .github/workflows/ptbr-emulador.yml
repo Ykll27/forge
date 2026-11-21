@@ -58,12 +58,15 @@ jobs:
           for f in estado.txt pasta-forge.txt erros.txt; do
             [ -f "$f" ] && { echo "=== ARQUIVO $f ==="; cat "$f"; echo "=== FIM ==="; }
           done
+          python3 -m pip install --quiet --disable-pip-version-check pillow > /dev/null 2>&1 || true
           for p in *.png; do
             [ -f "$p" ] || continue
             img="$p"
-            if ffmpeg -loglevel error -y -i "$p" -q:v 5 "${p%.png}.jpg"; then img="${p%.png}.jpg"; fi
+            if python3 -c "import sys; from PIL import Image; Image.open(sys.argv[1]).convert('RGB').save(sys.argv[2], quality=70)" "$p" "${p%.png}.jpg"; then
+              img="${p%.png}.jpg"
+            fi
             echo "=== CAPTURA ${p%.png} ==="
-            base64 -w 0 "$img"; echo
+            base64 -w 4000 "$img"   # o log corta linhas muito longas
             echo "=== FIM ==="
           done
 

@@ -64,9 +64,22 @@ adb install -r -g emu/Forge-PT-BR.apk
 
 # recursos já instalados (o mesmo conteúdo que o app baixaria do assets.zip da release)
 DIR=/sdcard/Android/obb/$PKG/Forge
-adb shell mkdir -p "$DIR"
-adb push emu/assets/. "$DIR/" > /dev/null
-adb shell ls "$DIR" > "$OUT/pasta-forge.txt"
+instalar_recursos() {
+    {
+        echo "== $1"
+        adb shell mkdir -p "$DIR" 2>&1
+        adb push emu/assets/. "$DIR/" 2>&1 | tail -3
+        adb shell ls -la "$DIR" 2>&1 | head -20
+    } >> "$OUT/pasta-forge.txt"
+}
+instalar_recursos antes-de-abrir
+if ! adb shell ls "$DIR/res" > /dev/null 2>&1; then
+    # o app cria a própria pasta obb na primeira abertura; tenta de novo depois disso
+    adb shell am start -n "$PKG/.Launcher"
+    sleep 20
+    adb shell am force-stop "$PKG"
+    instalar_recursos depois-da-primeira-abertura
+fi
 
 adb logcat -c
 adb shell am start -n "$PKG/.Launcher"
