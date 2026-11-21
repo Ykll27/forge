@@ -190,7 +190,8 @@ public class AssetsDownloader {
                 Forge.exitAnimation(false); //can't continue if this fails
                 return;
             }
-        } else if (versionString.equals(FileUtil.readFileToString(versionFile.file())) && FSkin.getSkinDir() != null) {
+        } else if (versionString.equals(FileUtil.readFileToString(versionFile.file())) && FSkin.getSkinDir() != null
+                && sameBuild(buildTxtFileHandle, resDir.child("build.txt"))) {
             run(runnable);
             return; //if version matches what had been previously saved and FSkin isn't requesting assets download, no need to download assets
         }
@@ -303,6 +304,22 @@ public class AssetsDownloader {
         // auto restart after update
         Forge.isMobileAdventureMode = Forge.advStartup;
         Forge.exitAnimation(true);
+    }
+
+    /**
+     * Forge PT-BR: builds do mesmo dia têm a mesma versão (só a data entra nela). Sem comparar a
+     * data de build, um APK novo do mesmo dia seguia com os recursos antigos. Arquivos ausentes ou
+     * ilegíveis contam como iguais, para não pedir download à toa.
+     */
+    private static boolean sameBuild(FileHandle appBuild, FileHandle resBuild) {
+        try {
+            if (!appBuild.exists() || !resBuild.exists()) {
+                return true;
+            }
+            return appBuild.readString().trim().equals(resBuild.readString().trim());
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     private static void run(Runnable toRun) {
