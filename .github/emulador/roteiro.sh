@@ -55,3 +55,12 @@ espera 30
 foto 16-partida
 espera 15
 foto 17-partida
+toque 51 605            # Jogar (começar)
+espera 12
+foto 18-mao
+deslize 300 500 300 500 1500   # segurar uma carta da mão (zoom)
+espera 4
+foto 19-zoom
+deslize 640 200 640 500 300    # deslizar para baixo: visão de detalhes
+espera 3
+foto 20-detalhes
