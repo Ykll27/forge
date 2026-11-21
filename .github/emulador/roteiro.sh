@@ -23,3 +23,9 @@ espera 25
 foto 07-classico
 espera 10
 foto 08-classico
+toque 1228 605          # "Not Now" (índice de imagens)
+espera 5
+foto 09-lobby
+toque 661 168           # deck do jogador 1
+espera 10
+foto 10-escolher-deck
