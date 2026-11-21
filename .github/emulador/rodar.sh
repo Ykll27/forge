@@ -77,5 +77,10 @@ source "$ROOT/.github/emulador/roteiro.sh"
 
 estado fim
 adb logcat -d > "$OUT/logcat.txt" 2>&1
-grep -iE "FATAL|AndroidRuntime|Exception" "$OUT/logcat.txt" | head -80 > "$OUT/erros.txt" || true
+PID=$(adb shell pidof "$PKG" | tr -d '\r')
+{
+    echo "pid do app: ${PID:-(não está rodando)}"
+    grep -E "FATAL EXCEPTION|Process: $PKG" -A25 "$OUT/logcat.txt" | head -120
+    [ -n "$PID" ] && grep -E " $PID " "$OUT/logcat.txt" | grep -iE "exception|error|forge|ptbr" | tail -60
+} > "$OUT/erros.txt" 2>&1 || true
 exit 0

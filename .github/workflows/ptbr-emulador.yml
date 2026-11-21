@@ -60,9 +60,10 @@ jobs:
           done
           for p in *.png; do
             [ -f "$p" ] || continue
-            convert "$p" -quality 70 "${p%.png}.jpg"
+            img="$p"
+            if ffmpeg -loglevel error -y -i "$p" -q:v 5 "${p%.png}.jpg"; then img="${p%.png}.jpg"; fi
             echo "=== CAPTURA ${p%.png} ==="
-            base64 -w 0 "${p%.png}.jpg"; echo
+            base64 -w 0 "$img"; echo
             echo "=== FIM ==="
           done
 
