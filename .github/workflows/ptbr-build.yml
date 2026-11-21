@@ -7,18 +7,9 @@ name: PT-BR - testes e APK
 
 on:
   workflow_dispatch:
+  # qualquer mudança no ramo do fork gera e publica um APK novo (o app inteiro entra no APK)
   push:
-    paths:
-      - 'forge-ptbr/**'
-      - 'forge-core/src/main/java/forge/util/CardTranslation.java'
-      - 'forge-gui/src/main/java/forge/gui/ptbr/**'
-      - 'forge-gui-mobile/src/forge/card/**'
-      - 'forge-gui-mobile/src/forge/deck/**'
-      - 'forge-gui-android/**'
-      - 'forge-core/src/main/java/forge/deck/**'
-      - 'forge-core/src/main/java/forge/StaticData.java'
-      - 'forge-gui/res/languages/cardnames-pt-BR*'
-      - '.github/workflows/ptbr-build.yml'
+    branches: [ptbr-mobile]
 
 jobs:
   testes:
