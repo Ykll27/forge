@@ -34,6 +34,6 @@ espera 4
 toque 75 565            # Settings
 espera 8
 foto 11-config
-deslize 660 500 660 150 400
-espera 3
-foto 12-config-2
+toque 690 110           # Language
+espera 4
+foto 12-idiomas
