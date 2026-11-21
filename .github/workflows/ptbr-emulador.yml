@@ -50,6 +50,22 @@ jobs:
           disable-animations: true
           script: bash .github/emulador/rodar.sh
 
+      # Também no log (JPEG em base64), para quem não consegue baixar artefatos do run.
+      - name: Capturas no log
+        if: always()
+        run: |
+          cd emu/capturas || exit 0
+          for f in estado.txt pasta-forge.txt erros.txt; do
+            [ -f "$f" ] && { echo "=== ARQUIVO $f ==="; cat "$f"; echo "=== FIM ==="; }
+          done
+          for p in *.png; do
+            [ -f "$p" ] || continue
+            convert "$p" -quality 70 "${p%.png}.jpg"
+            echo "=== CAPTURA ${p%.png} ==="
+            base64 -w 0 "${p%.png}.jpg"; echo
+            echo "=== FIM ==="
+          done
+
       - name: Guardar capturas
         if: always()
         uses: actions/upload-artifact@v4
