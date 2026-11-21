@@ -18,3 +18,8 @@ espera 40
 foto 05-inicio
 espera 30
 foto 06-inicio
+toque 640 466           # Classic Mode
+espera 25
+foto 07-classico
+espera 10
+foto 08-classico
