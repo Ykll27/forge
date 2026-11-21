@@ -1052,13 +1052,14 @@ public class CardZoom extends FOverlay {
     }
 
     /**
-     * Selo no topo da visão de detalhes (quando há tradução ativa): de onde vem o texto exibido
-     * (oficial, automático, corrigido) e um toque para alternar com o original em inglês. Só na
-     * visão de detalhes, onde o texto é desenhado; na visão de imagem a foto da carta não muda.
+     * Selo no topo do zoom (quando há tradução ativa): de onde vem o texto exibido (oficial,
+     * automático, corrigido) e um toque para alternar com o original em inglês. Na visão de imagem
+     * aparece quando as cartas são montadas em português; o original ali é a foto da carta.
      * Fica na barra de mensagens superior, que só é usada por avisos de ativação e de aventura.
      */
     private void drawLanguagePill(Graphics g, float w, float messageHeight) {
-        if (zoomMode || !CardTextLanguage.isAvailable() || isAdvBack || currentActivateAction != null || currentCard == null) {
+        // na visão de imagem só quando a carta é montada em português (senão a foto não muda ao tocar)
+        if ((zoomMode && !CardTextLanguage.renderPreferred()) || !CardTextLanguage.isAvailable() || isAdvBack || currentActivateAction != null || currentCard == null) {
             languagePill.set(0, 0, 0, 0);
             return;
         }
@@ -1138,6 +1139,7 @@ public class CardZoom extends FOverlay {
     }
 
     private void finishHide() {
+        CardTextLanguage.reset(); // "ver original" vale só enquanto o zoom está aberto
         if (cardViewsToClearObject != null) {
             for (CardView cardView : cardViewsToClearObject.values()) {
                 if (cardView != null)

@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public final class EffectTranslator {
     /** Aumente ao mudar regras ou glossário: traduções em cache com versão menor são refeitas. */
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
 
     private final TranslationMemory memory;
     private final Glossary glossary;
@@ -71,6 +71,12 @@ public final class EffectTranslator {
     public TranslationResult translate(CardTextEn card, String displayName) {
         Stats stats = new Stats();
         String name = displayName == null || displayName.isEmpty() ? card.name() : displayName;
+        String revised = RevisedTexts.bundled().get(card.name());
+        if (revised != null) {
+            // tradução revisada da carta inteira: tem contexto que as regras não têm
+            int lines = Math.max(1, card.oracleLines().size());
+            return new TranslationResult(revised.replace(SelfReference.PLACEHOLDER, name), lines, lines, null, VERSION);
+        }
         List<String> out = new ArrayList<>();
         for (String raw : card.oracleLines()) {
             SelfReference.Normalized norm = SelfReference.normalizeEnglish(raw.trim(), card.name());

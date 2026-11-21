@@ -6,3 +6,6 @@
 # Termos minerados de cartas oficiais sempre vencem as entradas daqui.
 # Mecânicas posteriores ao fim da impressão em português (2024) ficam em inglês até
 # alguém registrar aqui o termo adotado, com status e fonte na nota.
+SUBTYPE	Book	Livro	comunidade	subtipo de artefato criado em Bloomburrow, sem impressão em português
+SUBTYPE	Weasel	Doninha	comunidade	mesma palavra usada no texto oficial de outras cartas
+SUBTYPE	Skunk	Cangambá	comunidade	"Gambá" já é o subtipo Possum

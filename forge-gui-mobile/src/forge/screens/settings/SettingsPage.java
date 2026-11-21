@@ -931,6 +931,10 @@ public class SettingsPage extends TabPage<SettingsScreen> {
     /** Grupo "Cartas em português": baixar textos oficiais, tradução automática, selo de origem. */
     private void addPortugueseCardSettings(int group) {
         lstSettings.addGroup(Forge.getLocalizer().getMessageorUseDefault("lblPtBrCards", "Cards in Portuguese"));
+        lstSettings.addItem(new BooleanSetting(FPref.UI_PTBR_RENDER_CARDS,
+                Forge.getLocalizer().getMessageorUseDefault("cbPtBrRenderCards", "Show cards in Portuguese"),
+                Forge.getLocalizer().getMessageorUseDefault("nlPtBrRenderCards",
+                        "Draws the cards with their original art and the name, type and text in Portuguese, instead of the English card image.")), group);
         lstSettings.addItem(new BooleanSetting(FPref.UI_PTBR_AUTOMATIC_TRANSLATION,
                 Forge.getLocalizer().getMessageorUseDefault("cbPtBrAutomaticTranslation", "Automatic translation"),
                 Forge.getLocalizer().getMessageorUseDefault("nlPtBrAutomaticTranslation",

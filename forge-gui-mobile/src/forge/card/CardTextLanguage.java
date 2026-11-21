@@ -38,6 +38,24 @@ public final class CardTextLanguage {
         showOriginal = false;
     }
 
+    /** O jogador quer as cartas montadas em português (arte original + nome, tipo e texto traduzidos)? */
+    public static boolean renderPreferred() {
+        return isAvailable() && FModel.getPreferences().getPrefBoolean(FPref.UI_PTBR_RENDER_CARDS);
+    }
+
+    /** Montar as cartas agora? Não quando o jogador pediu para ver o original: aí vale a imagem da carta. */
+    public static boolean renderCards() {
+        return !showOriginal && renderPreferred();
+    }
+
+    /**
+     * Mesmo critério do modo "Art" do Forge (carta desenhada pelo app, com a arte recortada da imagem)
+     * mais a exibição em português. Usado em todo lugar que escolhe entre a imagem e a carta montada.
+     */
+    public static boolean useRenderedCard(CardView card) {
+        return "Art".equals(Forge.enableUIMask) || (card != null && card.useCardArt()) || renderCards();
+    }
+
     public static boolean showSourceBadge() {
         return isAvailable() && FModel.getPreferences().getPrefBoolean(FPref.UI_PTBR_SHOW_TEXT_SOURCE);
     }

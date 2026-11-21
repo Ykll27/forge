@@ -45,7 +45,7 @@ public class CardImage implements FImage {
 
         final String currentUiMask = Forge.enableUIMask != null ? Forge.enableUIMask : "Off";
         final boolean isOffMask = currentUiMask.equals("Off");
-        final boolean isArtMask = currentUiMask.equals("Art");
+        final boolean isArtMask = currentUiMask.equals("Art") || CardTextLanguage.renderCards();
 
         if (image == null) { // attempt to retrieve card image if needed
             image = ImageCache.getInstance().getImage(card);
@@ -57,7 +57,7 @@ public class CardImage implements FImage {
             }
         }
 
-        if (image == ImageCache.getInstance().getDefaultImage() || (isArtMask || cv.useCardArt())) {
+        if (image == ImageCache.getInstance().getDefaultImage() || (isArtMask || cv.useCardArt())) { // isArtMask inclui as cartas em português
             CardImageRenderer.drawCardImage(g, cv, false, x, y, w, h, CardStackPosition.Top, true, true);
         } else {
             switch (currentUiMask) {

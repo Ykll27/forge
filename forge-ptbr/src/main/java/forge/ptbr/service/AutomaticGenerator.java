@@ -72,7 +72,9 @@ public final class AutomaticGenerator {
             }
             out.considered++;
             String displayName = off != null && off.hasName() ? off.name() : card.name();
-            String hash = hash(card.name() + "|" + card.type() + "|" + card.oracle() + "|" + displayName);
+            String revised = forge.ptbr.translator.RevisedTexts.bundled().get(card.name());
+            String hash = hash(card.name() + "|" + card.type() + "|" + card.oracle() + "|" + displayName
+                    + (revised == null ? "" : "|" + revised));
             String meta = "v=" + EffectTranslator.VERSION + ";h=" + hash + ";m=" + memoryTag;
             String old = previousMeta == null ? null : previousMeta.get(card.name());
             if (old != null && old.startsWith(meta) && previous != null && previous.containsKey(card.name())) {

@@ -212,6 +212,16 @@ public class CardImageRenderer {
             }
         }
 
+        if (readableText && artHeight > 0 && !noText && !isFaceDown && !isSaga && !isClass && !isDungeon
+                && !card.isSplitCard() && !card.hasSecondaryState() && !card.hasPreparedSpell()) {
+            float needed = measureCardText(card, state, w - 2 * artInset);
+            if (needed > textBoxHeight) {
+                float moved = Math.min(needed - textBoxHeight, artHeight * 0.5f);
+                artHeight -= moved;
+                textBoxHeight += moved;
+            }
+        }
+
         //draw art box with Forge icon
         if (artHeight > 0) {
             if (isSaga)
@@ -447,7 +457,7 @@ public class CardImageRenderer {
             g.drawRect(BORDER_THICKNESS, Color.BLACK, x, y, w, h);
             return;
         }
-        if (Forge.enableUIMask.equals("Art") || cv.useCardArt()) {
+        if (CardTextLanguage.useRenderedCard(cv)) {
             FImageComplex cardArt = CardRenderer.getCardArt(cv);
             FImageComplex altArt = cardArt;
             boolean isHidden = (cv.getCurrentState().getImageKey().equals(ImageKeys.getTokenKey(ImageKeys.HIDDEN_CARD))
@@ -597,6 +607,48 @@ public class CardImageRenderer {
 
     //use text renderer to handle mana symbols and reminder text
     private static final TextRenderer cardTextRenderer = new TextRenderer(true);
+    /** Só mede (não desenha) o texto da carta, para não desfazer o cache do renderizador principal. */
+    private static final TextRenderer measureTextRenderer = new TextRenderer(true);
+    /**
+     * Forge PT-BR: ligado enquanto o zoom desenha uma carta montada em português. A caixa de texto
+     * ganha espaço da arte (no máximo metade dela) quando o texto não cabe, e a letra fica maior,
+     * para ler a carta durante a partida sem precisar trocar para a visão de detalhes.
+     */
+    private static boolean readableText;
+    private static FSkinFont readableTextFont;
+    private static float readableTextFontHeight;
+
+    private static FSkinFont detailsTextFont;
+    private static float detailsTextFontHeight;
+
+    private static FSkinFont detailsFont() {
+        float height = MANA_SYMBOL_SIZE * 1.5f;
+        if (detailsTextFont == null || detailsTextFontHeight != height) {
+            detailsTextFont = FSkinFont.forHeight(height);
+            detailsTextFontHeight = height;
+        }
+        return detailsTextFont;
+    }
+
+    private static FSkinFont readableFont() {
+        float height = MANA_SYMBOL_SIZE * 1.15f;
+        if (readableTextFont == null || readableTextFontHeight != height) {
+            readableTextFont = FSkinFont.forHeight(height);
+            readableTextFontHeight = height;
+        }
+        return readableTextFont;
+    }
+
+    /** Altura que o texto da carta precisa na largura dada (mesmo texto que setTextBox desenha). */
+    private static float measureCardText(CardView card, CardStateView state, float width) {
+        boolean needTranslation = !CardTextLanguage.isShowingOriginal() && !(card.isToken() && card.getCloneOrigin() == null);
+        String text = card.getText(state, needTranslation && state != null ? CardTranslation.getTranslationTexts(state) : null);
+        if (StringUtils.isEmpty(text)) {
+            return 0f;
+        }
+        float padding = getCapHeight(TEXT_FONT) * 0.75f;
+        return measureTextRenderer.getWrappedBounds(text, TEXT_FONT, width - 2 * padding).height + 2 * padding;
+    }
 
     private static void drawTextBox(Graphics g, CardView card, CardStateView state, Color[] colors, float x, float y, float w, float h, boolean onTop, boolean useCardBGTexture, boolean noText, boolean altstate, boolean isFacedown, boolean canShow, boolean isChoiceList, boolean isArtVisible) {
         if (card.hasSecondaryState() || card.hasPreparedSpell()) {
@@ -948,7 +1000,20 @@ public class CardImageRenderer {
             return;
         }
         // when image is not available draw the card renders
-        if (image == null || image == ImageCache.getInstance().getDefaultImage() || (Forge.enableUIMask.equals("Art") || card.useCardArt())) { //support drawing card image manually if card image not found
+        if (image == null || image == ImageCache.getInstance().getDefaultImage() || CardTextLanguage.useRenderedCard(card)) { //support drawing card image manually if card image not found
+            if (CardTextLanguage.renderCards()) {
+                updateStaticFields(w, h);
+                FSkinFont regularTextFont = TEXT_FONT;
+                readableText = true;
+                TEXT_FONT = readableFont();
+                try {
+                    drawCardImage(g, card, altState, x, y, w, h, CardStackPosition.Top, true, true);
+                } finally {
+                    readableText = false;
+                    TEXT_FONT = regularTextFont;
+                }
+                return;
+            }
             drawCardImage(g, card, altState, x, y, w, h, CardStackPosition.Top, true, true);
         } else {
             float wh_Adj = ForgeConstants.isGdxPortLandscape && isCurrentCard ? 1.38f : 1.0f;
@@ -1264,13 +1329,16 @@ public class CardImageRenderer {
         fillColorBackground(g, colors, x, y, w, h);
         g.drawRect(BORDER_THICKNESS, Color.BLACK, x, y, w, h);
 
-        float padX = getCapHeight(TEXT_FONT) / 2;
+        // Forge PT-BR: com tradução ativa, começa com letra bem maior e deixa o renderizador encolher
+        // até caber; antes o texto ficava miúdo no alto de uma caixa quase vazia
+        FSkinFont font = CardTextLanguage.isAvailable() ? detailsFont() : TEXT_FONT;
+        float padX = getCapHeight(font) / 2;
         float padY = padX + Utils.scale(2); //add a little more vertical padding
         x += padX;
         y += padY;
         w -= 2 * padX;
         h -= 2 * padY;
-        cardTextRenderer.drawText(g, CardDetailUtil.composeCardText(state, gameView, canShow, CardTextLanguage.isShowingOriginal()), TEXT_FONT, Color.BLACK, x, y, w, h, y, h, true, Align.left, false);
+        cardTextRenderer.drawText(g, CardDetailUtil.composeCardText(state, gameView, canShow, CardTextLanguage.isShowingOriginal()), font, Color.BLACK, x, y, w, h, y, h, true, Align.left, false);
     }
 
     private static void drawDetailsIdAndPtBox(Graphics g, CardStateView state, boolean canShow, Color idForeColor, Color[] colors, float x, float y, float w, float h) {

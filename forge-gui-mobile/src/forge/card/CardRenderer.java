@@ -635,7 +635,7 @@ public class CardRenderer {
             }
         }
         if (image != null) {
-            if (image == ImageCache.getInstance().getDefaultImage() || (Forge.enableUIMask.equals("Art") || card.useCardArt())) {
+            if (image == ImageCache.getInstance().getDefaultImage() || CardTextLanguage.useRenderedCard(card)) {
                 CardImageRenderer.drawCardImage(g, card, false, x, y, w, h, pos, true, true);
             } else {
                 if (Forge.enableUIMask.equals("Full")) {
@@ -678,7 +678,7 @@ public class CardRenderer {
             minusxy = 0.135f * radius;
         }
         if (image != null) {
-            if (image == ImageCache.getInstance().getDefaultImage() || (Forge.enableUIMask.equals("Art") ||card.useCardArt())) {
+            if (image == ImageCache.getInstance().getDefaultImage() || CardTextLanguage.useRenderedCard(card)) {
                 CardImageRenderer.drawCardImage(g, card, showAltState, x, y, w, h, pos, true, false, isChoiceList, !CardRendererUtils.showCardIdOverlay(card));
             } else if (showsleeves) {
                 if (!card.isForeTold())

@@ -387,6 +387,8 @@ public class Main extends AndroidApplication {
             forgeLogo = findViewById(resId("id", "logo_id"));
             activeView = findViewById(resId("id", "mainview"));
             activeView.setBackgroundColor(Color.WHITE);
+            if (permissiongranted && !exception)
+                lockOrientation(isLandscape); // já durante a abertura, para a rotação terminar antes de o jogo medir a tela
             forgeApp = Forge.getApp(hwInfo, getAndroidClipboard(), adapter, ASSETS_DIR, !isLandscape, isTabletDevice, Build.VERSION.SDK_INT);
             forgeView = initializeForView(forgeApp, config);
 
@@ -398,15 +400,13 @@ public class Main extends AndroidApplication {
                         if (!permissiongranted || exception) {
                             displayMessage(forgeLogo, adapter, exception, msg, false);
                         } else if (title.isEmpty() && steps.isEmpty()) {
-                            if (isLandscape) {
-                                Main.this.setRequestedOrientation(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
-                                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : //Oreo and above has virtual back/menu buttons
-                                        ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                            } else {
-                                Main.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-                            }
+                            lockOrientation(isLandscape);
                             crossfade(forgeView, forgeLogo);
                         } else {
+                            // Forge PT-BR: o aviso de especificação (pouca RAM ou Android < 11) também precisa
+                            // travar a orientação; sem isso, com o celular deitado, a janela abria em paisagem
+                            // enquanto o jogo se montava em retrato (telas tortas e retângulos brancos).
+                            lockOrientation(isLandscape);
                             if (sharedPreferences.getBoolean("run_anyway", false)) {
                                 crossfade(forgeView, forgeLogo);
                                 return;
@@ -484,6 +484,16 @@ public class Main extends AndroidApplication {
             }).start();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void lockOrientation(boolean isLandscape) {
+        if (isLandscape) {
+            Main.this.setRequestedOrientation(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
+                    ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE : //Oreo and above has virtual back/menu buttons
+                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            Main.this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         }
     }
 

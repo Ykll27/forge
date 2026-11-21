@@ -68,6 +68,20 @@ KEYWORD	offspring {M0}	prole {M0}	comunidade	mecânica de 2024 sem impressão em
 Tipos: `KEYWORD`, `ABILITY_WORD`, `SUBTYPE`, `TYPE`, `TOKEN`, `COUNTER`. Status `oficial` ou
 `comunidade`. Termos minerados de cartas oficiais sempre vencem o glossário.
 
+### Traduções revisadas (cartas inteiras)
+
+As coleções a partir de Bloomburrow (agosto de 2024) não foram impressas em português, então não
+há texto oficial nem frases parecidas no acervo para a memória reaproveitar. Para elas,
+`src/main/resources/forge/ptbr/revisadas.txt` traz o texto inteiro da carta, escrito a partir do
+Oracle com a terminologia oficial (`nome em inglês|texto`, `\n` entre linhas). O tradutor usa esse
+texto antes da memória e das regras; ele continua marcado como tradução automática e nunca passa
+por cima de texto oficial ou de correção do jogador.
+
+`RevisedTextsTest` exige que cada carta exista, não tenha texto oficial e mantenha, linha a linha,
+os custos, números, P/R e X do Oracle. Hoje o arquivo cobre Bloomburrow (187 cartas que a memória
+não traduzia inteiras). Para acrescentar uma coleção, inclua as cartas no arquivo (em ordem
+alfabética), rode os testes e regenere as traduções distribuídas.
+
 ## Regenerar as traduções distribuídas
 
 Depois de mudar o tradutor ou o arquivo oficial:

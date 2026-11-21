@@ -193,6 +193,7 @@ public class ForgePreferences extends AbstractPreferences<ForgePreferences.FPref
         UI_LANGUAGE("en-US"),
         UI_PTBR_AUTOMATIC_TRANSLATION("true"), // pt-BR: traduz automaticamente cartas sem texto oficial (só exibição)
         UI_PTBR_SHOW_TEXT_SOURCE("true"),      // pt-BR: mostra no zoom se o texto é oficial, automático ou corrigido
+        UI_PTBR_RENDER_CARDS("true"),          // pt-BR: desenha as cartas com a arte original e o texto em português
 
         AUTO_UPDATE("none"),
         USE_SENTRY("false"), // this controls whether automated bug reporting is done or not
