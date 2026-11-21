@@ -3,17 +3,18 @@
 
 espera 15
 foto 01-aviso
+toque 443 403           # "Don't remind me next time."
 toque_texto "Run Forge.."
 espera 25
 foto 02-download
 toque 52 605            # botão "Download" dos recursos
-espera 60
-foto 03-baixando
-espera 60
-foto 04-baixando
-espera 60
-foto 05-carregando
-espera 45
-foto 06-inicio
+espera 50
+foto 03-depois-do-download
+toque_texto "Run Forge.."   # o Forge reinicia depois de instalar os recursos
+espera 40
+foto 04-carregando
+toque_texto "Run Forge.."
+espera 40
+foto 05-inicio
 espera 30
-foto 07-inicio
+foto 06-inicio
