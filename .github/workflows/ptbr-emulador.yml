@@ -25,18 +25,14 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Baixar APK e recursos da release
+      - name: Baixar o APK da release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           mkdir -p emu && cd emu
-          gh release download daily-snapshots --repo "$GITHUB_REPOSITORY" -p Forge-PT-BR.apk -p assets.zip -p version.txt
-          mkdir -p assets
-          unzip -q assets.zip -d assets
-          cp version.txt assets/version.txt
-          rm assets.zip
-          echo "versão: $(cat version.txt)"; find assets -type f | wc -l
+          gh release download daily-snapshots --repo "$GITHUB_REPOSITORY" -p Forge-PT-BR.apk -p version.txt
+          echo "versão: $(cat version.txt)"
 
       - name: Rodar no emulador
         uses: reactivecircus/android-emulator-runner@v2
