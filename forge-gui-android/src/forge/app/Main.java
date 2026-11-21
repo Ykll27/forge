@@ -571,6 +571,17 @@ public class Main extends AndroidApplication {
         }
         //enforce orientation based on whether device is a tablet and user preference
         adapter.switchOrientationFile = ASSETS_DIR + "switch_orientation.ini";
+        // Forge PT-BR: no celular, abre em paisagem por padrão. Só na primeira abertura desta versão;
+        // depois vale a opção "Modo Paisagem" das configurações (que cria/apaga o mesmo arquivo).
+        String ptbrOrientationDefault = ASSETS_DIR + "ptbr_orientation_default.ini";
+        if (!adapter.isTablet && !FileUtil.doesFileExist(ptbrOrientationDefault)) {
+            try {
+                FileUtil.writeFile(adapter.switchOrientationFile, "1");
+                FileUtil.writeFile(ptbrOrientationDefault, "landscape");
+            } catch (Exception e) {
+                netLog.warn("[ptbr] could not set default orientation: {}", e.getMessage());
+            }
+        }
         boolean landscapeMode = adapter.isTablet == !FileUtil.doesFileExist(adapter.switchOrientationFile);
 
         String info = totalRAM < 3500 || Build.VERSION.SDK_INT < Build.VERSION_CODES.R ? "Device Specification Check\n" + getDeviceName()

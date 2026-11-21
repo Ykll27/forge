@@ -131,3 +131,9 @@ jobs:
           gh release create daily-snapshots release/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --prerelease --title "Forge PT-BR (teste)" \
             --notes "Baixe e instale o Forge-PT-BR.apk (assinado com chave de depuração). Na primeira abertura o app baixa o assets.zip desta release (cerca de 190 MB; prefira Wi-Fi)."
+
+  # Abre o APK recém-publicado num emulador (celular simples, deitado) e guarda capturas de tela.
+  emulador:
+    needs: apk
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == 'ptbr-mobile'
+    uses: ./.github/workflows/ptbr-emulador.yml
