@@ -37,7 +37,7 @@ foto 11-config
 toque 690 110           # Language
 espera 4
 foto 12-idiomas
-toque 700 158           # pt-BR
+toque 700 568           # pt-BR (8º da lista, em ordem alfabética)
 espera 4
 foto 13-idioma-escolhido
 adb shell am force-stop forge.app

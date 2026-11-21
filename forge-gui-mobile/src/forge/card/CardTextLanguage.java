@@ -4,6 +4,7 @@ import forge.Forge;
 import forge.game.card.CardView;
 import forge.game.card.CardView.CardStateView;
 import forge.gui.card.CardDetailUtil;
+import forge.gui.ptbr.PtBrIntegration;
 import forge.localinstance.properties.ForgePreferences.FPref;
 import forge.model.FModel;
 import forge.util.CardTranslation;
@@ -57,7 +58,9 @@ public final class CardTextLanguage {
     }
 
     public static boolean showSourceBadge() {
-        return isAvailable() && FModel.getPreferences().getPrefBoolean(FPref.UI_PTBR_SHOW_TEXT_SOURCE);
+        // a origem (oficial, automática, corrigida) só existe para as camadas em português
+        return isAvailable() && PtBrIntegration.isPortuguese(FModel.getPreferences().getPref(FPref.UI_LANGUAGE))
+                && FModel.getPreferences().getPrefBoolean(FPref.UI_PTBR_SHOW_TEXT_SOURCE);
     }
 
     /** Nome a desenhar: o original quando o jogador pediu, senão o traduzido. */

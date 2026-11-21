@@ -36,6 +36,8 @@ public class FLanguage {
             if (!languageName.endsWith(".properties")) { continue; }
             allLanguages.add(languageName.replace(".properties", ""));
         }
+        // a ordem da listagem de arquivos muda de aparelho para aparelho
+        java.util.Collections.sort(allLanguages);
 
         return allLanguages;
     }
