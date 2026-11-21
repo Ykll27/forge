@@ -29,3 +29,11 @@ foto 09-lobby
 toque 661 168           # deck do jogador 1
 espera 10
 foto 10-escolher-deck
+toque 248 27            # voltar da escolha de deck
+espera 4
+toque 75 565            # Settings
+espera 8
+foto 11-config
+deslize 660 500 660 150 400
+espera 3
+foto 12-config-2
