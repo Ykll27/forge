@@ -43,10 +43,12 @@ foto 13-idioma-escolhido
 adb shell am force-stop forge.app
 espera 2
 adb shell am start -n forge.app/.Launcher
-espera 45
+espera 50
 foto 14-reiniciado
+espera 30
+foto 14b-reiniciado
 toque 640 466           # Modo Clássico
-espera 20
+espera 25
 foto 15-lobby-pt
 toque 662 541           # Início
 espera 30
