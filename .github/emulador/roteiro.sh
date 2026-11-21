@@ -37,3 +37,19 @@ foto 11-config
 toque 690 110           # Language
 espera 4
 foto 12-idiomas
+toque 700 158           # pt-BR
+espera 4
+foto 13-idioma-escolhido
+adb shell am force-stop forge.app
+espera 2
+adb shell am start -n forge.app/.Launcher
+espera 45
+foto 14-reiniciado
+toque 640 466           # Modo Clássico
+espera 20
+foto 15-lobby-pt
+toque 662 541           # Início
+espera 30
+foto 16-partida
+espera 15
+foto 17-partida
