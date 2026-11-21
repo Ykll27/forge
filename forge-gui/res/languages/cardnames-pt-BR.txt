@@ -16445,7 +16445,7 @@ Plaguebearer|Portador da Peste||
 Plaguecrafter|Empesteiro|Criatura — Humano Xamã|Quando Empesteiro entra no campo de batalha, cada jogador sacrifica uma criatura ou um planeswalker. Cada jogador que não estiver apto descarta um card.
 Plagued Rusalka|Rusalka Atormentada|Criatura — Espírito|{B}, Sacrifique uma criatura: A criatura alvo recebe -1/-1 até o final do turno.
 Plaguemaw Beast|Fera das Mandíbulas Pestilentas|Criatura — Besta|{T}, Sacrifique uma criatura: Prolifere. (Você escolhe um número qualquer de permanentes e/ou jogadores com marcadores sobre eles e depois dá a cada um outro marcador de um tipo que eles já tenham.)
-Plains|Plains|Basic Land — Plains|
+Plains|Planície|Terreno Básico - Planície|
 Plan the Heist|Planejar o Assalto|Feitiço|Use vigiar 3 se você não tiver nenhum card na mão. Depois, compre três cards. (Para usar vigiar 3, olhe os três cards do topo do seu grimório. Depois, coloque qualquer número deles em seu cemitério e o restante no topo de seu grimório em qualquer ordem.)\nTramar {3}{U} (Você pode pagar {3}{U} e exilar este card de sua mão. Conjure-o como um feitiço num turno posterior sem pagar seu custo de mana. Trame somente como um feitiço.)
 Planar Ally|Aliado Extraplanar|Criatura — Anjo|Voar\nToda vez que Aliado extraplanar atacar, aventure-se na masmorra. (Entre na primeira sala ou prossiga para a próxima.)
 Planar Birth|Nascimento Interplanar||
@@ -21917,7 +21917,7 @@ Swab Goblin|Goblin Marujo|Criatura — Goblin Pirata|
 Swaggering Corsair|Corsário Bravateiro|Criatura — Humano Pirata|Raide — Corsário Bravateiro entra no campo de batalha com um marcador +1/+1 se você atacou com uma criatura neste turno.
 Swallow Whole|Engolir Inteiro|Feitiço|Como custo adicional para conjurar esta mágica, vire uma criatura desvirada que você controla.\nExile a criatura virada alvo. Coloque um marcador +1/+1 na criatura virada para pagar o custo adicional desta mágica.
 Swallowing Plague|Praga Tragadora|Feitiço - Arcana|Praga Tragadora causa X pontos de dano à criatura alvo e você ganha X pontos de vida.
-Swamp|Pântano|Basic Land - Pântano|B
+Swamp|Pântano|Terreno Básico - Pântano|
 Swamp Mosquito|Mosquito do Pântano|Criatura — Inseto|Voar\nToda vez que Mosquito do Pântano atacar e não for bloqueado, o jogador defensor receberá um marcador de veneno. (Um jogador com dez ou mais marcadores de veneno perde o jogo.)
 Swan Song|Canção do Cisne|Mágica Instantânea|Anule a mágica instantânea, de encantamento ou de feitiço alvo. O controlador dela coloca no campo de batalha uma ficha de criatura azul 2/2 do tipo Ave com voar.
 Swans of Bryn Argoll|Cisnes de Bryn Argoll|Criatura — Ave Espírito|Voar\nSe uma fonte for causar dano a Cisnes de Bryn Argoll, previna aquele dano. O controlador da fonte compra um número de cards igual ao dano prevenido dessa maneira.

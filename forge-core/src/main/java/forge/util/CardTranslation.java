@@ -634,15 +634,28 @@ public class CardTranslation {
             if (!text.equals(translated)) {
                 result = TextUtil.fastReplace(result, text, translated);
             } else {
-                // keywords maybe combined into one line, split them and try translate again
+                // keywords maybe combined into one line ("Flying, first strike"): split them and
+                // try again, keyword by keyword, changing only this line
                 String [] splitKeywords = text.split(", ");
                 if (splitKeywords.length <= 1) continue;
+                String line = text;
                 for (String keyword : splitKeywords) {
-                    if (keyword.contains(" ")) continue;
+                    String bare = keyword.replaceAll("\\([^()]*\\)", "").trim();
+                    // a keyword, not a fragment of a sentence: short and not ending a sentence
+                    if (bare.isEmpty() || bare.endsWith(".") || bare.split("\\s+").length > 3) continue;
                     translated = translateSingleDescriptionText(keyword, card);
-                    if (!keyword.equals(translated)) {
-                        result = TextUtil.fastReplace(result, keyword, translated);
+                    if (keyword.equals(translated)) continue;
+                    if (!keyword.contains("(")) {
+                        // the translated line brings its reminder text; the combined line had none
+                        translated = translated.replaceAll("\\s*\\([^()]*\\)", "").trim();
                     }
+                    if (!translated.isEmpty() && Character.isLowerCase(keyword.charAt(0))) {
+                        translated = Character.toLowerCase(translated.charAt(0)) + translated.substring(1);
+                    }
+                    line = TextUtil.fastReplace(line, keyword, translated);
+                }
+                if (!line.equals(text)) {
+                    result = TextUtil.fastReplace(result, text, line);
                 }
             }
         }

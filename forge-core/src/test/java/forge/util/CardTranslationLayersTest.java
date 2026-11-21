@@ -26,7 +26,8 @@ public class CardTranslationLayersTest {
         Files.write(langDir.resolve("cardnames-pt-BR.txt"), Arrays.asList(
                 "Lightning Bolt|Raio|Mágica Instantânea|Raio causa 3 pontos de dano a qualquer alvo.",
                 "Abandon Hope|Abandonar a Esperança||",
-                "Serra Angel|Anjo Serra|Criatura — Anjo|Voar\\nVigilância"), StandardCharsets.UTF_8);
+                "Serra Angel|Anjo Serra|Criatura — Anjo|Voar\\nVigilância",
+                "Razorfoot Griffin|Grifo Garra-de-Navalha|Criatura — Grifo|Voar (Esta criatura só pode ser bloqueada por criaturas com a habilidade de voar.)\\nIniciativa (Esta criatura causa dano de combate antes de criaturas sem a habilidade de iniciativa.)"), StandardCharsets.UTF_8);
         Files.write(langDir.resolve("cardnames-pt-BR-automatica.txt"), Arrays.asList(
                 "Abandon Hope||Feitiço|Texto automático.|v=1;h=x",
                 "Lightning Bolt||Tipo automático errado|Texto automático errado.|v=1;h=y",
@@ -100,6 +101,15 @@ public class CardTranslationLayersTest {
         Assert.assertEquals(CardTranslation.getTranslatedOracle("Serra Angel"), "Voar (corrigido)");
         Assert.assertEquals(CardTranslation.getTextSource("Serra Angel"), CardTranslation.Source.USER);
         Assert.assertEquals(CardTranslation.getTranslatedName("Lightning Bolt"), "Raio", "correção antiga removida");
+    }
+
+    @Test
+    public void combinedKeywordLineTranslatesEveryKeyword() {
+        ITranslatable griffin = () -> "Razorfoot Griffin";
+        CardTranslation.buildOracleMapping("Razorfoot Griffin", "Flying\\nFirst strike", null); // \\n literal, como nos scripts
+        Assert.assertEquals(CardTranslation.translateMultipleDescriptionText("Flying, first strike", griffin), "Voar, iniciativa");
+        Assert.assertEquals(CardTranslation.translateMultipleDescriptionText("When it dies, draw a card, then discard a card.", griffin),
+                "When it dies, draw a card, then discard a card.", "frase com vírgulas não é lista de palavras-chave");
     }
 
     @Test
