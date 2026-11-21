@@ -64,3 +64,14 @@ foto 19-zoom
 deslize 640 200 640 500 300    # deslizar para baixo: visão de detalhes
 espera 3
 foto 20-detalhes
+deslize 782 505 782 505 1500   # segurar a 1ª carta da mão inicial (zoom)
+espera 4
+foto 21-zoom-carta
+deslize 640 150 640 450 300    # deslizar para baixo: visão de detalhes
+espera 3
+foto 22-zoom-detalhes
+adb shell input keyevent 4     # voltar: fecha o zoom
+espera 3
+toque 51 605                   # Manter
+espera 15
+foto 23-campo
